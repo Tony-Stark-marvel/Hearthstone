@@ -25,8 +25,7 @@ import (
 这个是输入音频给模型
 */
 const (
-	// Gemini 2.5 预览版模型
-	ModelName      = "models/gemini-3-flash-preview"
+	ModelName      = "models/gemini-3-pro-preview"
 	SampleRate     = 16000
 	Channels       = 1
 	ChunkSize      = 1024
