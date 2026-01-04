@@ -1,5 +1,5 @@
 # Hearthstone
-炉石传说-酒馆战旗-AI上分神器
+炉石传说-战略陪伴工具
 
 `github.com/gordonklaus/portaudio` 这个包不是纯 Go 写的，它是 **CGO** 包，底层依赖 C 语言的 PortAudio 库。如果你的系统里没有安装 PortAudio 的 `.h` 头文件和 `.lib/.dll` 动态库，或者 Go 编译器找不到它们，就会报这个错（因为该包里的 Go 文件都有 `// +build` 约束，检测不到 C 库就会被排除）。
 
