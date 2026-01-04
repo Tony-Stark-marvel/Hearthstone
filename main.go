@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"os/signal"
 	"strings"
 	"syscall"
@@ -19,6 +20,10 @@ import (
 	"google.golang.org/genai"
 )
 
+/*
+*
+这个是输入音频给模型
+*/
 const (
 	// Gemini 2.5 预览版模型
 	ModelName      = "models/gemini-3-flash-preview"
@@ -82,7 +87,7 @@ func main() {
 func runGeminiLoop(ctx context.Context, apiKey string, engine *AudioEngine) error {
 	// 1. 创建客户端
 	// 1. 设置代理 (请修改为你的实际端口)
-	proxyUrl, _ := url.Parse("http://127.0.0.1:7890")
+	proxyUrl, _ := url.Parse("http://127.0.0.1:1082")
 
 	myHttpClient := &http.Client{
 		Transport: &http.Transport{
@@ -228,6 +233,8 @@ func handleConversation(
 				// 打印文本
 				if part.Text != "" {
 					fmt.Printf("🤖 Text: %s\n", part.Text)
+					// 调用音频输出
+					speakTextWindows(part.Text)
 				}
 				// 播放音频
 				if part.InlineData != nil {
@@ -341,4 +348,16 @@ func bytesToInt16(data []byte) []int16 {
 	reader := bytes.NewReader(data)
 	binary.Read(reader, binary.LittleEndian, &samples)
 	return samples
+}
+
+func speakTextWindows(text string) {
+	// 简单的转义防止命令注入
+	// 注意：这里只是简单的实现，对于极其复杂的字符可能需要更严谨的处理
+	cmdStr := fmt.Sprintf(`Add-Type -AssemblyName System.Speech; (New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak("%s");`, text)
+
+	cmd := exec.Command("powershell", "-Command", cmdStr)
+	err := cmd.Run()
+	if err != nil {
+		log.Printf("TTS 朗读失败: %v", err)
+	}
 }

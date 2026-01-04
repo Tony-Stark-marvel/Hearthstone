@@ -10,7 +10,11 @@ import (
 	"os"
 )
 
-const ModelNameIdea = "models/gemini-3-flash-preview"
+/**
+这个是文本给模型
+*/
+
+const ModelNameIdea = "models/gemini-3-pro-preview"
 
 func main() {
 	ctx := context.Background()
