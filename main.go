@@ -25,7 +25,7 @@ import (
 这个是输入音频给模型
 */
 const (
-	ModelName      = "models/gemini-3-pro-preview"
+	ModelName      = "models/gemini-3-flash-preview"
 	SampleRate     = 16000
 	Channels       = 1
 	ChunkSize      = 1024
@@ -86,7 +86,7 @@ func main() {
 func runGeminiLoop(ctx context.Context, apiKey string, engine *AudioEngine) error {
 	// 1. 创建客户端
 	// 1. 设置代理 (请修改为你的实际端口)
-	proxyUrl, _ := url.Parse("http://127.0.0.1:1082")
+	proxyUrl, _ := url.Parse("http://127.0.0.1:1081")
 
 	myHttpClient := &http.Client{
 		Transport: &http.Transport{
