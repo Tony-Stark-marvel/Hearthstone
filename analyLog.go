@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"google.golang.org/genai"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -13,6 +15,7 @@ import (
 	"time"
 
 	"github.com/hpcloud/tail"
+	"github.com/sashabaranov/go-openai"
 )
 
 var (
@@ -20,6 +23,7 @@ var (
 	logBuffer      []string
 	mu             sync.Mutex
 	ModelNameAnaly = "gemini-flash-latest"
+	GeminiBaseURL  = "https://generativelanguage.googleapis.com/v1beta/openai/"
 )
 
 func main() {
@@ -85,6 +89,59 @@ func collectRelevantLog(text string) {
 			logBuffer = logBuffer[1:]
 		}
 		mu.Unlock()
+	}
+}
+
+func callGeminiStream(rawLogs string) error {
+	// 初始化 OpenAI 兼容客户端
+	apiKey := os.Getenv("GEMINI_API_KEY")
+	config := openai.DefaultConfig(apiKey)
+	config.BaseURL = GeminiBaseURL
+	proxyUrl, _ := url.Parse("http://127.0.0.1:1082")
+
+	myHttpClient := &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyURL(proxyUrl),
+		},
+	}
+	config.HTTPClient = myHttpClient
+	client := openai.NewClientWithConfig(config)
+
+	ctx := context.Background()
+
+	// 构造针对 10 行日志的专项 Prompt
+	systemPrompt := `你是一位炉石传说酒馆战棋教练。
+我会给你最近发生的10行核心游戏日志。
+请注意：ZONE=3是场面，ZONE=4是手牌，ZONE=7是酒馆，RESOURCES是金币。
+请根据这10行信息快速推断现状，并直接给出本回合的操作指令（买、卖、升本、刷新或冻结）。`
+
+	req := openai.ChatCompletionRequest{
+		Model: ModelNameAnaly,
+		Messages: []openai.ChatCompletionMessage{
+			{Role: openai.ChatMessageRoleSystem, Content: systemPrompt},
+			{Role: openai.ChatMessageRoleUser, Content: "最新日志片段如下：\n" + rawLogs},
+		},
+		Stream: true,
+	}
+
+	// 使用流式传输
+	stream, err := client.CreateChatCompletionStream(ctx, req)
+	if err != nil {
+		return err
+	}
+	defer stream.Close()
+
+	fmt.Print("✨ AI 导师建议: ")
+	for {
+		response, err := stream.Recv()
+		if errors.Is(err, io.EOF) {
+			fmt.Println("\n--------------------------")
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Print(response.Choices[0].Delta.Content)
 	}
 }
 

@@ -7,6 +7,7 @@ toolchain go1.24.11
 require (
 	github.com/gordonklaus/portaudio v0.0.0-20250206071425-98a94950218b
 	github.com/hpcloud/tail v1.0.0
+	github.com/sashabaranov/go-openai v1.41.2
 	google.golang.org/genai v1.40.0
 )
 
