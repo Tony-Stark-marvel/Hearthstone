@@ -31,8 +31,9 @@ func main() {
 	logPath := ("D:\\gox\\Hearthstone\\log\\Power.log")
 
 	t, err := tail.TailFile(logPath, tail.Config{
-		Follow:   true,
-		ReOpen:   true,
+		Follow: true,
+		ReOpen: true,
+		// whence 2是从最新的开始读取
 		Location: &tail.SeekInfo{Offset: 0, Whence: 0},
 	})
 	if err != nil {
