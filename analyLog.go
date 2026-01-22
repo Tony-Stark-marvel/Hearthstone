@@ -22,7 +22,7 @@ var (
 	// 日志缓冲区，只存最近的关键信息
 	logBuffer      []string
 	mu             sync.Mutex
-	ModelNameAnaly = "gemini-flash-latest"
+	ModelNameAnaly = "gemini-3-flash-preview"
 	GeminiBaseURL  = "https://generativelanguage.googleapis.com/v1beta/openai/"
 )
 
@@ -65,7 +65,8 @@ func aiAnalysisLoop() {
 		mu.Unlock()
 
 		fmt.Println("\n🤖 正在发送原始日志请求 AI 决策...")
-		callAI(logsToSend)
+		//callAI(logsToSend)
+		callGeminiStream(logsToSend)
 	}
 }
 
